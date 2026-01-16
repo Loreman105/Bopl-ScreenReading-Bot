@@ -4,6 +4,22 @@ import mss
 from screeninfo import get_monitors
 import time
 
+
+def copy_to_clipboard(text: str) -> None:
+    """Copy text to the system clipboard (Windows/macOS/Linux) using stdlib tkinter."""
+    try:
+        import tkinter as tk
+
+        r = tk.Tk()
+        r.withdraw()
+        r.clipboard_clear()
+        r.clipboard_append(text)
+        r.update()  # ensures it persists after the window is destroyed
+        r.destroy()
+    except Exception as e:
+        print("[WARN] Clipboard copy failed:", e)
+        print(text)
+
 def nothing(x):
     pass
 
@@ -22,6 +38,30 @@ def calibration_tool():
 
     # 2. Create a Window with Sliders (Trackbars)
     cv2.namedWindow("HSV Calibrator")
+
+    # Clickable "Copy" button (drawn onto the preview image)
+    BTN_X, BTN_Y, BTN_W, BTN_H = 10, 10, 140, 36
+    state = {
+        "l_h": 0,
+        "l_s": 0,
+        "l_v": 0,
+        "u_h": 0,
+        "u_s": 0,
+        "u_v": 0,
+        "copied_at": 0.0,
+    }
+
+    def on_mouse(event, x, y, flags, param):
+        if event != cv2.EVENT_LBUTTONDOWN:
+            return
+        if (BTN_X <= x <= (BTN_X + BTN_W)) and (BTN_Y <= y <= (BTN_Y + BTN_H)):
+            txt = (
+                f"(({state['l_h']}, {state['l_s']}, {state['l_v']}), ({state['u_h']}, {state['u_s']}, {state['u_v']}))"
+            )
+            copy_to_clipboard(txt)
+            state["copied_at"] = time.time()
+
+    cv2.setMouseCallback("HSV Calibrator", on_mouse)
     
     # Create sliders for Lower and Upper HSV ranges
     # Standard starting values for "Blue"
@@ -39,6 +79,7 @@ def calibration_tool():
     print("2. Adjust the sliders until ONLY your character is white.")
     print("3. Everything else (background) should be black.")
     print("4. Press 'q' to quit and print the values.")
+    print("5. Click the 'Copy' button in the preview to copy values.")
     print("-------------------------------------------------------")
 
     while True:
@@ -58,6 +99,9 @@ def calibration_tool():
         u_s = cv2.getTrackbarPos("U - S", "HSV Calibrator")
         u_v = cv2.getTrackbarPos("U - V", "HSV Calibrator")
 
+        state["l_h"], state["l_s"], state["l_v"] = l_h, l_s, l_v
+        state["u_h"], state["u_s"], state["u_v"] = u_h, u_s, u_v
+
         lower_bound = np.array([l_h, l_s, l_v])
         upper_bound = np.array([u_h, u_s, u_v])
 
@@ -67,12 +111,24 @@ def calibration_tool():
         # Visualize
         # Resize for easier viewing on desktop
         preview = cv2.resize(mask, (640, 360))
-        cv2.imshow("HSV Calibrator", preview)
+
+        # Convert to color so we can draw UI elements (button/text)
+        preview_ui = cv2.cvtColor(preview, cv2.COLOR_GRAY2BGR)
+
+        # Draw Copy button
+        cv2.rectangle(preview_ui, (BTN_X, BTN_Y), (BTN_X + BTN_W, BTN_Y + BTN_H), (60, 60, 60), -1)
+        cv2.rectangle(preview_ui, (BTN_X, BTN_Y), (BTN_X + BTN_W, BTN_Y + BTN_H), (255, 255, 255), 1)
+        cv2.putText(preview_ui, "Copy", (BTN_X + 40, BTN_Y + 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+        # Show a brief "COPIED!" status after clicking
+        if (time.time() - float(state["copied_at"])) < 1.2:
+            cv2.putText(preview_ui, "COPIED!", (BTN_X + BTN_W + 12, BTN_Y + 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+        cv2.imshow("HSV Calibrator", preview_ui)
 
         if cv2.waitKey(1) == ord('q'):
-            print("\n\n### COPY THESE VALUES INTO train_bopl.py ###")
-            print(f"self.lower_color = np.array([{l_h}, {l_s}, {l_v}])")
-            print(f"self.upper_color = np.array([{u_h}, {u_s}, {u_v}])")
+            print("\n\n### COPY THESE VALUES INTO CONFIG ###")
+            print(f"(({l_h}, {l_s}, {l_v}), ({u_h}, {u_s}, {u_v}))")
             print("##############################################\n")
             break
 
