@@ -1,0 +1,24 @@
+# Python 3.10.9 Dependencies for Bopl-ScreenReading-Bot
+# First upgrade pip: python -m pip install --upgrade pip setuptools wheel
+# Then install with: pip install -r requirements.txt
+
+# Core numerical library (use binary wheel to avoid build issues)
+numpy==1.26.4
+
+# Computer Vision
+opencv-python==4.10.0.84
+
+# Screen Capture
+mss==9.0.1
+screeninfo==0.8.1
+
+# Input Control
+PyDirectInput==1.0.4
+
+# Reinforcement Learning
+gymnasium==0.29.1
+stable-baselines3==2.1.0
+
+# Additional dependencies for stable-baselines3
+torch==2.0.1
+tensorboard

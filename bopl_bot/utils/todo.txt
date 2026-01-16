@@ -1,0 +1,4 @@
+TODO:
+-   Modify the code to automatically detect the type of map and apply filters specific to that type, which
+    removes the background and stuff like that
+-   Modify the code to have the player color be in config, with presets for each color

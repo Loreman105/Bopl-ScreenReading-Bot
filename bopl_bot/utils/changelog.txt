@@ -1,0 +1,17 @@
+
+1-15-2025 CHANGES SINCE LAST COMMIT (not in order)
+---------------------------------------------------
+Add "copy" button to HSV calibrator
+Split code into several files
+Add agent view window which shows the processed image
+Add player blob window which shows the mask used for detecting the player blob
+Modify blob detection to do a better job of differentiating it from the trail
+Change aim system to be relative to the player
+Force the cursor to stay on one monitor, even when the other is turned on
+Make UI windows movable, scalable, and automatically placed on the user's non-bopl monitor
+Add F8 hotkey to pause and F9 to resume
+Add W and S (up and down) actions
+Add penalty for staying still, holding one button for too long, or doing the same action too much in a row
+Add edges and motion channels
+Slightly improve dashboard UI
+Probably lots of other stuff I don't remember

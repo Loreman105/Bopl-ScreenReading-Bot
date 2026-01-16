@@ -4,7 +4,7 @@ import numpy as np
 import time
 from screeninfo import get_monitors
 
-# YOUR COLORS (From previous chat)
+# YOUR COLORS
 MY_LOWER = np.array([168, 60, 200])
 MY_UPPER = np.array([173, 255, 255])
 
